@@ -28,17 +28,24 @@ Este proyecto ejecuta una prueba automatica simple sobre Google:
 - src/test/java/com/automation/tasks/BuscarEnGoogle.java: utilidad de busqueda reutilizable.
 - src/test/java/com/automation/questions/ElTituloDePagina.java: lectura de titulo (pieza auxiliar).
 - HOW_IT_WORK.md: explicacion funcional paso a paso.
-- QUICK_START.md: comandos de ejecucion.
 
 ## Requisitos
 
 - Java 21 instalado y disponible en PATH.
 - Navegador Chrome/Chromium instalado.
 
-Verificar:
+Verificar Java:
 
 ```bash
 java -version
+```
+
+Verificar navegador:
+
+```bash
+chrome --version
+google-chrome --version
+chromium --version
 ```
 
 ## Ejecucion
@@ -92,10 +99,51 @@ Ruta del reporte:
 target/site/serenity/index.html
 ```
 
+Abrir reporte:
+
+Linux:
+
+```bash
+xdg-open target/site/serenity/index.html
+```
+
+macOS:
+
+```bash
+open target/site/serenity/index.html
+```
+
+Windows:
+
+```powershell
+start target/site/serenity/index.html
+```
+
+## Flujo minimo recomendado
+
+Linux/macOS:
+
+```bash
+chmod +x gradlew
+./gradlew clean test aggregate
+```
+
+Windows:
+
+```powershell
+gradlew.bat clean test aggregate
+```
+
 ## Estado actual
 
 - La prueba usa metodos directos de Selenium en GoogleTest (get, findElement, click, sendKeys).
 - El reporte Serenity se genera al ejecutar pruebas.
+
+## Notas
+
+- El proyecto esta configurado para usar Java 21 desde Gradle.
+- La prueba actual abre Google y ejecuta una busqueda automatizada.
+- Si en tu entorno no existe Chrome con ese nombre, usa el navegador compatible que tengas configurado para Selenium.
 
 ## Subida a GitHub
 
