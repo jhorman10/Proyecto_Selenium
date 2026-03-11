@@ -6,9 +6,13 @@ plugins {
 group = 'com.automation'
 version = '1.0-SNAPSHOT'
 
-def serenityOutputDirectory = file("$projectDir/target/site/serenity").absolutePath
-System.setProperty("serenity.outputDirectory", serenityOutputDirectory)
-project.extensions.extraProperties.set("serenity.outputDirectory", serenityOutputDirectory)
+def serenityOutputDirectory = file("$projectDir/target/site/serenity")
+
+serenity {
+    outputDirectory = serenityOutputDirectory
+}
+
+System.setProperty("serenity.outputDirectory", serenityOutputDirectory.absolutePath)
 
 java {
     toolchain {
@@ -32,11 +36,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    systemProperty "serenity.outputDirectory", serenityOutputDirectory
+    systemProperty "serenity.outputDirectory", serenityOutputDirectory.absolutePath
 }
 
 tasks.named("aggregate") {
     doFirst {
-        System.setProperty("serenity.outputDirectory", serenityOutputDirectory)
+        System.setProperty("serenity.outputDirectory", serenityOutputDirectory.absolutePath)
     }
 }
