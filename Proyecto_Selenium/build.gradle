@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'net.serenity-bdd.serenity-gradle-plugin' version '4.0.15'
+}
+
+group = 'com.automation'
+version = '1.0-SNAPSHOT'
+
+def serenityOutputDirectory = file("$projectDir/target/site/serenity").absolutePath
+System.setProperty("serenity.outputDirectory", serenityOutputDirectory)
+project.extensions.extraProperties.set("serenity.outputDirectory", serenityOutputDirectory)
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation "net.serenity-bdd:serenity-core:4.0.15"
+    testImplementation "net.serenity-bdd:serenity-junit5:4.0.15"
+    testImplementation "net.serenity-bdd:serenity-screenplay:4.0.15"
+    testImplementation "net.serenity-bdd:serenity-screenplay-webdriver:4.0.15"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.1"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.10.1"
+    implementation "org.slf4j:slf4j-simple:2.0.9"
+}
+
+test {
+    useJUnitPlatform()
+    systemProperty "serenity.outputDirectory", serenityOutputDirectory
+}
+
+tasks.named("aggregate") {
+    doFirst {
+        System.setProperty("serenity.outputDirectory", serenityOutputDirectory)
+    }
+}
