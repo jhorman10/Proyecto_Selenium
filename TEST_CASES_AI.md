@@ -122,6 +122,19 @@ Caso de prueba: Reporte manual exitoso
 Dado que un usuario autenticado con el rol "usuario/colaborador" posee un JWT válido
 Y tiene acceso al endpoint POST /api/threats
 Cuando envía un reporte con los campos requeridos: tipo (válido del catálogo), severidad (bajo), descripción (25 caracteres), fecha (hoy), fuente (identificada correctamente)
+Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando el contexto de negocio, los criterios de aceptación, las reglas de negocio y aplicando técnicas de diseño ISTQB: partición de equivalencias, valores límite/borde, combinatoria, análisis de causa-efecto, pruebas de flujo alternativo y excepciones.
+
+---
+
+### CASOS DE PRUEBA PARA GESTIÓN CENTRALIZADA DE REPORTE DE AMENAZAS
+
+#### Caso de prueba 1: Reporte manual exitoso por usuario autenticado
+
+```gherkin
+Caso de prueba: Reporte manual exitoso
+Dado que un usuario autenticado con el rol "usuario/colaborador" posee un JWT válido
+Y tiene acceso al endpoint POST /api/threats
+Cuando envía un reporte con los campos requeridos: tipo (válido del catálogo), severidad (bajo), descripción (25 caracteres), fecha (hoy), fuente (identificada correctamente)
 Entonces el sistema acepta el reporte, publica el evento en RabbitMQ, persiste la amenaza en PostgreSQL y notifica vía WebSocket
 Y la acción queda registrada en el sistema de auditoría y logging estructurado
 ```
@@ -316,15 +329,6 @@ Entonces el sistema permite la reconexión y entrega el historial solicitado des
 
 Estos casos de prueba cubren flujos normales, alternos, excepciones, validaciones, combinaciones, límites y reglas de negocio, siguiendo el enfoque sistemático recomendado por ISTQB.
 
----
-
-### Ajustes Realizados por el Probador
-
-| ID Caso | Caso de Prueba generado por la instrucción | Ajuste del realizado por el probador | ¿Por qué se ajustó? |
-|---------|--------------------------|------------------|----------------------|
-| CP-002-01 | [Ejemplo: No valida token con formato incorrecto] | [Agregar escenario con token malformado] | [Validación de seguridad: el middleware debe rechazar tokens con formato inválido antes de intentar decodificar] |
-| CP-002-02 | [Pendiente] | [Pendiente] | [Pendiente] |
-| CP-002-03 | [Pendiente] | [Pendiente] | [Pendiente] |
 
 **Técnicas de Diseño Aplicadas:**
 - Partición de equivalencia: [Explicar aplicación]
@@ -338,10 +342,192 @@ Estos casos de prueba cubren flujos normales, alternos, excepciones, validacione
 
 ### Casos de Prueba Generados por SKAI
 
-**[PENDIENTE: Pegar aquí la salida completa de SKAI en formato Gherkin]**
+Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando tanto flujos básicos como alternos, casos límite, reglas de negocio y combinaciones relevantes, aplicando técnicas ISTQB como partición de equivalencias, análisis de valores límite, pruebas de transición de estado, pruebas basadas en roles y pruebas de combinaciones.
+
+---
+
+#### Caso de prueba 1: Acceso autorizado con token válido y rol correcto
 
 ```gherkin
-# Aquí irán los escenarios Gherkin generados por SKAI
+Caso de prueba: Acceso exitoso a ruta protegida por un administrador autenticado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "administrador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es permitido
+  Y los datos del usuario (ID, correo electrónico, rol, estado de cuenta) se adjuntan al request
+  Y se registra el acceso exitoso en el sistema de auditoría
+```
+
+#### Caso de prueba 2: Acceso autorizado a endpoint de colaborador
+
+```gherkin
+Caso de prueba: Acceso exitoso a ruta protegida por un colaborador autenticado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "colaborador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de reporte de amenazas
+  Entonces el acceso es permitido
+  Y los datos del usuario se adjuntan al request
+  Y se registra el acceso exitoso en el sistema de auditoría
+```
+
+#### Caso de prueba 3: Acceso denegado a endpoint de administración por colaborador
+
+```gherkin
+Caso de prueba: Intento de acceso a endpoint de administración por usuario colaborador
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "colaborador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo de falta de permisos
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 4: Token JWT expirado
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT expirado
+
+  Dado que tengo un token JWT expirado en el header Authorization en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo indicando token expirado
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 5: Token JWT inválido (firma incorrecta)
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT con firma inválida
+
+  Dado que tengo un token JWT inválido en el header Authorization en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo indicando token inválido
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 6: Ausencia del header Authorization
+
+```gherkin
+Caso de prueba: Intento de acceso sin header Authorization
+
+  Dado que no incluyo el header Authorization en la petición
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando que falta el token
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 7: Token JWT en formato incorrecto
+
+```gherkin
+Caso de prueba: Intento de acceso con formato incorrecto del token JWT
+
+  Dado que incluyo un header Authorization pero no en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo de formato incorrecto
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 8: Usuario bloqueado intenta acceder
+
+```gherkin
+Caso de prueba: Acceso denegado por usuario bloqueado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el usuario correspondiente está bloqueado en el sistema
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando usuario bloqueado
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 9: Usuario excede límites de uso
+
+```gherkin
+Caso de prueba: Acceso denegado por exceder límites de uso
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el usuario ha excedido los límites de uso permitidos
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando límite de uso excedido
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 10: Token de un producer accediendo a endpoint de administración
+
+```gherkin
+Caso de prueba: Acceso denegado a endpoint de administración por usuario producer
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "producer"
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje de falta de permisos
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 11: Acceso a endpoint público sin autenticación
+
+```gherkin
+Caso de prueba: Acceso exitoso a endpoint público sin autenticación
+
+  Dado que no incluyo el header Authorization en la petición
+  Cuando realizo una petición a un endpoint público (por ejemplo, login o registro)
+  Entonces el acceso es permitido
+  Y no se requiere validación del token
+  Y se registra el acceso en el sistema de auditoría como público
+```
+
+#### Caso de prueba 12: Longitud máxima del token en el header Authorization
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT que excede la longitud máxima permitida
+
+  Dado que incluyo un token JWT en el header Authorization que excede la longitud máxima configurada
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando token inválido por longitud
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 13: Token JWT con datos de usuario incompletos
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT sin datos completos de usuario
+
+  Dado que tengo un token JWT válido pero faltan datos requeridos (ejemplo: rol o ID)
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando datos insuficientes en el token
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+#### Caso de prueba 14: Validación de combinación de roles y endpoints
+
+```gherkin
+Caso de prueba: Acceso según matriz de permisos configurada
+
+  Dado que tengo un token JWT válido con un rol específico
+  Cuando realizo una petición a un endpoint cuya autorización depende de la matriz de permisos
+  Entonces el acceso es permitido o denegado según la configuración actual de la matriz
+  Y el resultado es registrado en el sistema de auditoría
+```
+
+#### Caso de prueba 15: Acceso concurrente con múltiples tokens para el mismo usuario
+
+```gherkin
+Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mismo usuario
+
+  Dado que tengo dos tokens JWT válidos para el mismo usuario en diferentes sesiones
+  Cuando realizo peticiones simultáneas a endpoints protegidos
+  Entonces ambos accesos se permiten si los tokens no están revocados ni expirados
+  Y se registran ambos accesos en el sistema de auditoría con los datos de usuario correspondientes
 ```
 
 ---
