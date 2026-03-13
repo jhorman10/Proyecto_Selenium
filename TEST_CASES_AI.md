@@ -565,9 +565,3 @@ Entonces el sistema permite la reconexión y entrega el historial solicitado des
 1. **Prioridad alta:** Automatizar los escenarios de autenticación (HU-001) y middleware (HU-002) con Serenity BDD + REST Assured, ya que son prerequisitos de seguridad para todo el sistema.
 2. **Prioridad media:** Automatizar los flujos de reporte de amenazas (HU-003 casos 1-8) con validación de respuestas HTTP y verificación de persistencia en PostgreSQL.
 3. **Prioridad baja:** Automatizar escenarios de integración con RabbitMQ y WebSocket usando contenedores Docker para simular fallos de infraestructura (DLX, reconexión).
-
-### Próximos Pasos
-- [ ] Implementar casos de prueba en Serenity BDD con patrón Screenplay
-- [ ] Configurar ambiente de pruebas con datos de prueba
-- [ ] Ejecutar suite completa y generar reporte
-- [ ] Integrar con pipeline CI/CD
