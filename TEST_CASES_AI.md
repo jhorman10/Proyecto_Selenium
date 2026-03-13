@@ -109,26 +109,7 @@ Esquema del Caso de Prueba: Bloqueo temporal tras múltiples intentos fallidos
 
 ### Casos de Prueba Generados por SKAI
 
-Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando el contexto de negocio, los criterios de aceptación, las reglas de negocio y aplicando técnicas de diseño ISTQB: partición de equivalencias, valores límite/borde, combinatoria, análisis de causa-efecto, pruebas de flujo alternativo y excepciones.
-
----
-
-### CASOS DE PRUEBA PARA GESTIÓN CENTRALIZADA DE REPORTE DE AMENAZAS
-
-#### Caso de prueba 1: Reporte manual exitoso por usuario autenticado
-
-```gherkin
-Caso de prueba: Reporte manual exitoso
-Dado que un usuario autenticado con el rol "usuario/colaborador" posee un JWT válido
-Y tiene acceso al endpoint POST /api/threats
-Cuando envía un reporte con los campos requeridos: tipo (válido del catálogo), severidad (bajo), descripción (25 caracteres), fecha (hoy), fuente (identificada correctamente)
-Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando el contexto de negocio, los criterios de aceptación, las reglas de negocio y aplicando técnicas de diseño ISTQB: partición de equivalencias, valores límite/borde, combinatoria, análisis de causa-efecto, pruebas de flujo alternativo y excepciones.
-
----
-
-### CASOS DE PRUEBA PARA GESTIÓN CENTRALIZADA DE REPORTE DE AMENAZAS
-
-#### Caso de prueba 1: Reporte manual exitoso por usuario autenticado
+**Caso de prueba 1: Reporte manual exitoso por usuario autenticado**
 
 ```gherkin
 Caso de prueba: Reporte manual exitoso
@@ -139,7 +120,7 @@ Entonces el sistema acepta el reporte, publica el evento en RabbitMQ, persiste l
 Y la acción queda registrada en el sistema de auditoría y logging estructurado
 ```
 
-#### Caso de prueba 2: Acceso denegado a endpoint por usuario no autenticado
+**Caso de prueba 2: Acceso denegado a endpoint por usuario no autenticado**
 
 ```gherkin
 Caso de prueba: Acceso denegado sin autenticación
@@ -149,7 +130,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error de autenticaci�
 Y registra el intento fallido en los logs de auditoría
 ```
 
-#### Caso de prueba 3: Acceso denegado por rol incorrecto
+**Caso de prueba 3: Acceso denegado por rol incorrecto**
 
 ```gherkin
 Caso de prueba: Acceso denegado por rol incorrecto
@@ -159,7 +140,7 @@ Entonces el sistema rechaza la solicitud por falta de permisos
 Y registra el intento fallido en los logs de auditoría
 ```
 
-#### Caso de prueba 4: Validación de tipo de amenaza fuera de catálogo
+**Caso de prueba 4: Validación de tipo de amenaza fuera de catálogo**
 
 ```gherkin
 Caso de prueba: Tipo de amenaza inválido
@@ -169,7 +150,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error de validación
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 5: Validación de severidad fuera de valores permitidos
+**Caso de prueba 5: Validación de severidad fuera de valores permitidos**
 
 ```gherkin
 Caso de prueba: Severidad inválida
@@ -179,7 +160,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error de validación
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 6: Descripción por debajo del mínimo
+**Caso de prueba 6: Descripción por debajo del mínimo**
 
 ```gherkin
 Caso de prueba: Descripción demasiado corta
@@ -189,7 +170,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error indicando la lo
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 7: Fecha en el futuro
+**Caso de prueba 7: Fecha en el futuro**
 
 ```gherkin
 Caso de prueba: Fecha de amenaza futura
@@ -199,7 +180,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error de validación
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 8: Fuente de amenaza no identificada
+**Caso de prueba 8: Fuente de amenaza no identificada**
 
 ```gherkin
 Caso de prueba: Fuente no identificada
@@ -209,7 +190,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error por campo oblig
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 9: Reporte automático exitoso desde servicio productor
+**Caso de prueba 9: Reporte automático exitoso desde servicio productor**
 
 ```gherkin
 Caso de prueba: Reporte automático exitoso
@@ -219,7 +200,7 @@ Entonces el evento se valida, publica en RabbitMQ, se persiste en PostgreSQL y s
 Y la acción queda registrada en el sistema de auditoría y logging estructurado
 ```
 
-#### Caso de prueba 10: Reporte automático con dato inválido
+**Caso de prueba 10: Reporte automático con dato inválido**
 
 ```gherkin
 Caso de prueba: Reporte automático con error de validación
@@ -228,7 +209,7 @@ Cuando el sistema procesa el evento
 Entonces rechaza el evento, lo registra en los logs de auditoría y retorna un mensaje descriptivo de error
 ```
 
-#### Caso de prueba 11: Publicación fallida a RabbitMQ con reintentos y envío a DLX
+**Caso de prueba 11: Publicación fallida a RabbitMQ con reintentos y envío a DLX**
 
 ```gherkin
 Caso de prueba: Publicación a RabbitMQ falla y reintenta
@@ -239,7 +220,7 @@ Entonces el evento es enviado automáticamente a la Dead Letter Exchange (DLX)
 Y se registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 12: Persistencia fallida en PostgreSQL
+**Caso de prueba 12: Persistencia fallida en PostgreSQL**
 
 ```gherkin
 Caso de prueba: Persistencia fallida en base de datos
@@ -249,7 +230,7 @@ Cuando el sistema intenta guardar la amenaza
 Entonces retorna un mensaje descriptivo de error al usuario y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 13: Replay del historial exitoso por usuario
+**Caso de prueba 13: Replay del historial exitoso por usuario**
 
 ```gherkin
 Caso de prueba: Replay de historial exitoso
@@ -259,7 +240,7 @@ Cuando solicita el replay del historial filtrando por usuario, rango de fechas y
 Entonces el sistema retorna únicamente los eventos que cumplen los filtros
 ```
 
-#### Caso de prueba 14: Replay con filtros sin coincidencias
+**Caso de prueba 14: Replay con filtros sin coincidencias**
 
 ```gherkin
 Caso de prueba: Replay sin resultados
@@ -268,7 +249,7 @@ Cuando solicita el replay del historial con filtros que no corresponden a ningú
 Entonces el sistema retorna una respuesta vacía o mensaje indicando ausencia de resultados
 ```
 
-#### Caso de prueba 15: Logging y auditoría de acciones exitosas
+**Caso de prueba 15: Logging y auditoría de acciones exitosas**
 
 ```gherkin
 Caso de prueba: Registro de acciones exitosas
@@ -277,7 +258,7 @@ Cuando la operación se completa exitosamente
 Entonces la acción debe quedar registrada en el sistema de auditoría y logging estructurado con todos los detalles relevantes
 ```
 
-#### Caso de prueba 16: Logging y auditoría de acciones fallidas
+**Caso de prueba 16: Logging y auditoría de acciones fallidas**
 
 ```gherkin
 Caso de prueba: Registro de errores en auditoría
@@ -286,7 +267,7 @@ Cuando ocurre el incidente
 Entonces el sistema debe registrar el fallo con suficiente detalle en el sistema de auditoría y logging estructurado
 ```
 
-#### Caso de prueba 17: Ingreso de datos excediendo los límites permitidos (longitud máxima)
+**Caso de prueba 17: Ingreso de datos excediendo los límites permitidos (longitud máxima)**
 
 ```gherkin
 Caso de prueba: Campos exceden longitud máxima
@@ -296,7 +277,7 @@ Entonces el sistema rechaza la solicitud con un mensaje de error de validación
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 18: Combinación de campos válidos y no válidos
+**Caso de prueba 18: Combinación de campos válidos y no válidos**
 
 ```gherkin
 Caso de prueba: Envío de reporte con combinación de campos válidos y no válidos
@@ -306,7 +287,7 @@ Entonces el sistema rechaza la solicitud y retorna mensajes descriptivos por cad
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 19: Bloqueo temporal por exceder límite de uso
+**Caso de prueba 19: Bloqueo temporal por exceder límite de uso**
 
 ```gherkin
 Caso de prueba: Bloqueo por exceso de reportes
@@ -316,7 +297,7 @@ Entonces el sistema bloquea temporalmente al usuario y retorna un mensaje inform
 Y registra el incidente en los logs de auditoría
 ```
 
-#### Caso de prueba 20: Reconexión y replay tras desconexión de WebSocket
+**Caso de prueba 20: Reconexión y replay tras desconexión de WebSocket**
 
 ```gherkin
 Caso de prueba: Reconexión y replay tras desconexión
@@ -325,16 +306,19 @@ Cuando se reconecta al sistema y solicita el replay del historial
 Entonces el sistema permite la reconexión y entrega el historial solicitado desde Redis
 ```
 
----
+### Ajustes Realizados por el Probador
 
-Estos casos de prueba cubren flujos normales, alternos, excepciones, validaciones, combinaciones, límites y reglas de negocio, siguiendo el enfoque sistemático recomendado por ISTQB.
-
+| ID Caso | Caso de Prueba (Descripción) | Ajuste del Probador | ¿Por qué se ajustó? |
+|---------|------------------------------|---------------------|----------------------|
+| CP-002-01 | [Pendiente] | [Pendiente] | [Pendiente] |
+| CP-002-02 | [Pendiente] | [Pendiente] | [Pendiente] |
+| CP-002-03 | [Pendiente] | [Pendiente] | [Pendiente] |
 
 **Técnicas de Diseño Aplicadas:**
-- Partición de equivalencia: [Explicar aplicación]
-- Valores límite: [Explicar aplicación]
-- Pruebas de seguridad: [Explicar aplicación]
-- Pruebas negativas: [Explicar aplicación]
+- **Partición de equivalencia:** [Explicar aplicación]
+- **Valores límite:** [Explicar aplicación]
+- **Pruebas de seguridad:** [Explicar aplicación]
+- **Pruebas negativas:** [Explicar aplicación]
 
 ---
 
@@ -342,11 +326,7 @@ Estos casos de prueba cubren flujos normales, alternos, excepciones, validacione
 
 ### Casos de Prueba Generados por SKAI
 
-Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando tanto flujos básicos como alternos, casos límite, reglas de negocio y combinaciones relevantes, aplicando técnicas ISTQB como partición de equivalencias, análisis de valores límite, pruebas de transición de estado, pruebas basadas en roles y pruebas de combinaciones.
-
----
-
-#### Caso de prueba 1: Acceso autorizado con token válido y rol correcto
+**Caso de prueba 1: Acceso autorizado con token válido y rol correcto**
 
 ```gherkin
 Caso de prueba: Acceso exitoso a ruta protegida por un administrador autenticado
@@ -359,7 +339,7 @@ Caso de prueba: Acceso exitoso a ruta protegida por un administrador autenticado
   Y se registra el acceso exitoso en el sistema de auditoría
 ```
 
-#### Caso de prueba 2: Acceso autorizado a endpoint de colaborador
+**Caso de prueba 2: Acceso autorizado a endpoint de colaborador**
 
 ```gherkin
 Caso de prueba: Acceso exitoso a ruta protegida por un colaborador autenticado
@@ -372,7 +352,7 @@ Caso de prueba: Acceso exitoso a ruta protegida por un colaborador autenticado
   Y se registra el acceso exitoso en el sistema de auditoría
 ```
 
-#### Caso de prueba 3: Acceso denegado a endpoint de administración por colaborador
+**Caso de prueba 3: Acceso denegado a endpoint de administración por colaborador**
 
 ```gherkin
 Caso de prueba: Intento de acceso a endpoint de administración por usuario colaborador
@@ -385,7 +365,7 @@ Caso de prueba: Intento de acceso a endpoint de administración por usuario cola
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 4: Token JWT expirado
+**Caso de prueba 4: Token JWT expirado**
 
 ```gherkin
 Caso de prueba: Intento de acceso con token JWT expirado
@@ -397,7 +377,7 @@ Caso de prueba: Intento de acceso con token JWT expirado
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 5: Token JWT inválido (firma incorrecta)
+**Caso de prueba 5: Token JWT inválido (firma incorrecta)**
 
 ```gherkin
 Caso de prueba: Intento de acceso con token JWT con firma inválida
@@ -409,7 +389,7 @@ Caso de prueba: Intento de acceso con token JWT con firma inválida
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 6: Ausencia del header Authorization
+**Caso de prueba 6: Ausencia del header Authorization**
 
 ```gherkin
 Caso de prueba: Intento de acceso sin header Authorization
@@ -421,7 +401,7 @@ Caso de prueba: Intento de acceso sin header Authorization
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 7: Token JWT en formato incorrecto
+**Caso de prueba 7: Token JWT en formato incorrecto**
 
 ```gherkin
 Caso de prueba: Intento de acceso con formato incorrecto del token JWT
@@ -433,7 +413,7 @@ Caso de prueba: Intento de acceso con formato incorrecto del token JWT
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 8: Usuario bloqueado intenta acceder
+**Caso de prueba 8: Usuario bloqueado intenta acceder**
 
 ```gherkin
 Caso de prueba: Acceso denegado por usuario bloqueado
@@ -446,7 +426,7 @@ Caso de prueba: Acceso denegado por usuario bloqueado
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 9: Usuario excede límites de uso
+**Caso de prueba 9: Usuario excede límites de uso**
 
 ```gherkin
 Caso de prueba: Acceso denegado por exceder límites de uso
@@ -459,7 +439,7 @@ Caso de prueba: Acceso denegado por exceder límites de uso
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 10: Token de un producer accediendo a endpoint de administración
+**Caso de prueba 10: Token de un producer accediendo a endpoint de administración**
 
 ```gherkin
 Caso de prueba: Acceso denegado a endpoint de administración por usuario producer
@@ -472,7 +452,7 @@ Caso de prueba: Acceso denegado a endpoint de administración por usuario produc
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 11: Acceso a endpoint público sin autenticación
+**Caso de prueba 11: Acceso a endpoint público sin autenticación**
 
 ```gherkin
 Caso de prueba: Acceso exitoso a endpoint público sin autenticación
@@ -484,7 +464,7 @@ Caso de prueba: Acceso exitoso a endpoint público sin autenticación
   Y se registra el acceso en el sistema de auditoría como público
 ```
 
-#### Caso de prueba 12: Longitud máxima del token en el header Authorization
+**Caso de prueba 12: Longitud máxima del token en el header Authorization**
 
 ```gherkin
 Caso de prueba: Intento de acceso con token JWT que excede la longitud máxima permitida
@@ -496,7 +476,7 @@ Caso de prueba: Intento de acceso con token JWT que excede la longitud máxima p
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 13: Token JWT con datos de usuario incompletos
+**Caso de prueba 13: Token JWT con datos de usuario incompletos**
 
 ```gherkin
 Caso de prueba: Intento de acceso con token JWT sin datos completos de usuario
@@ -508,7 +488,7 @@ Caso de prueba: Intento de acceso con token JWT sin datos completos de usuario
   Y se registra el intento fallido en el sistema de auditoría
 ```
 
-#### Caso de prueba 14: Validación de combinación de roles y endpoints
+**Caso de prueba 14: Validación de combinación de roles y endpoints**
 
 ```gherkin
 Caso de prueba: Acceso según matriz de permisos configurada
@@ -519,7 +499,7 @@ Caso de prueba: Acceso según matriz de permisos configurada
   Y el resultado es registrado en el sistema de auditoría
 ```
 
-#### Caso de prueba 15: Acceso concurrente con múltiples tokens para el mismo usuario
+**Caso de prueba 15: Acceso concurrente con múltiples tokens para el mismo usuario**
 
 ```gherkin
 Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mismo usuario
@@ -530,21 +510,19 @@ Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mi
   Y se registran ambos accesos en el sistema de auditoría con los datos de usuario correspondientes
 ```
 
----
-
 ### Ajustes Realizados por el Probador
 
-| ID Caso | Caso de Prueba generado por la instrucción | Ajuste del realizado por el probador | ¿Por qué se ajustó? |
-|---------|--------------------------|------------------|----------------------|
+| ID Caso | Caso de Prueba (Descripción) | Ajuste del Probador | ¿Por qué se ajustó? |
+|---------|------------------------------|---------------------|----------------------|
 | CP-003-01 | [Ejemplo: Falta validar comportamiento cuando RabbitMQ no está disponible] | [Agregar escenario de fallo de conexión a RabbitMQ] | [Según arquitectura, debe enviarse a DLX. Crítico para resiliencia del sistema] |
 | CP-003-02 | [Ejemplo: No valida persistencia en PostgreSQL tras publicación exitosa] | [Agregar verificación de persistencia en BD] | [Regla de negocio: amenazas deben cumplir ACID en PostgreSQL] |
 | CP-003-03 | [Pendiente] | [Pendiente] | [Pendiente] |
 
 **Técnicas de Diseño Aplicadas:**
-- Partición de equivalencia: [Explicar aplicación]
-- Pruebas de integración: [Explicar aplicación]
-- Pruebas de resiliencia: [Explicar aplicación]
-- Pruebas de flujo de eventos: [Explicar aplicación]
+- **Partición de equivalencia:** [Explicar aplicación]
+- **Pruebas de integración:** [Explicar aplicación]
+- **Pruebas de resiliencia:** [Explicar aplicación]
+- **Pruebas de flujo de eventos:** [Explicar aplicación]
 
 ---
 
