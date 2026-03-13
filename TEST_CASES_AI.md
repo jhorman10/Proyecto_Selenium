@@ -316,7 +316,6 @@ Entonces el sistema permite la reconexión y entrega el historial solicitado des
 
 Estos casos de prueba cubren flujos normales, alternos, excepciones, validaciones, combinaciones, límites y reglas de negocio, siguiendo el enfoque sistemático recomendado por ISTQB.
 
-
 ---
 
 ### Ajustes Realizados por el Probador
