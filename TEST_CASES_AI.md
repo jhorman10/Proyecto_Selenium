@@ -106,13 +106,216 @@ Esquema del Caso de Prueba: Bloqueo temporal tras múltiples intentos fallidos
 
 ## HU-002: Middleware de Autenticación
 
+
 ### Casos de Prueba Generados por SKAI
 
-**[PENDIENTE: Pegar aquí la salida completa de SKAI en formato Gherkin]**
+Claro, a continuación se presentan los casos de prueba en lenguaje Gherkin en español, considerando el contexto de negocio, los criterios de aceptación, las reglas de negocio y aplicando técnicas de diseño ISTQB: partición de equivalencias, valores límite/borde, combinatoria, análisis de causa-efecto, pruebas de flujo alternativo y excepciones.
+
+---
+
+### CASOS DE PRUEBA PARA GESTIÓN CENTRALIZADA DE REPORTE DE AMENAZAS
+
+#### Caso de prueba 1: Reporte manual exitoso por usuario autenticado
 
 ```gherkin
-# Aquí irán los escenarios Gherkin generados por SKAI
+Caso de prueba: Reporte manual exitoso
+Dado que un usuario autenticado con el rol "usuario/colaborador" posee un JWT válido
+Y tiene acceso al endpoint POST /api/threats
+Cuando envía un reporte con los campos requeridos: tipo (válido del catálogo), severidad (bajo), descripción (25 caracteres), fecha (hoy), fuente (identificada correctamente)
+Entonces el sistema acepta el reporte, publica el evento en RabbitMQ, persiste la amenaza en PostgreSQL y notifica vía WebSocket
+Y la acción queda registrada en el sistema de auditoría y logging estructurado
 ```
+
+#### Caso de prueba 2: Acceso denegado a endpoint por usuario no autenticado
+
+```gherkin
+Caso de prueba: Acceso denegado sin autenticación
+Dado que un usuario no está autenticado
+Cuando intenta acceder al endpoint POST /api/threats
+Entonces el sistema rechaza la solicitud con un mensaje de error de autenticación
+Y registra el intento fallido en los logs de auditoría
+```
+
+#### Caso de prueba 3: Acceso denegado por rol incorrecto
+
+```gherkin
+Caso de prueba: Acceso denegado por rol incorrecto
+Dado que un usuario autenticado con un rol diferente a "usuario/colaborador" (por ejemplo, "administrador")
+Cuando intenta reportar una amenaza usando POST /api/threats
+Entonces el sistema rechaza la solicitud por falta de permisos
+Y registra el intento fallido en los logs de auditoría
+```
+
+#### Caso de prueba 4: Validación de tipo de amenaza fuera de catálogo
+
+```gherkin
+Caso de prueba: Tipo de amenaza inválido
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte cuyo tipo de amenaza no pertenece al catálogo predefinido
+Entonces el sistema rechaza la solicitud con un mensaje de error de validación
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 5: Validación de severidad fuera de valores permitidos
+
+```gherkin
+Caso de prueba: Severidad inválida
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte con severidad distinta a "bajo", "medio", "alto" o "crítico"
+Entonces el sistema rechaza la solicitud con un mensaje de error de validación
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 6: Descripción por debajo del mínimo
+
+```gherkin
+Caso de prueba: Descripción demasiado corta
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte con una descripción de menos de 20 caracteres
+Entonces el sistema rechaza la solicitud con un mensaje de error indicando la longitud mínima requerida
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 7: Fecha en el futuro
+
+```gherkin
+Caso de prueba: Fecha de amenaza futura
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte con una fecha posterior al día actual
+Entonces el sistema rechaza la solicitud con un mensaje de error de validación
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 8: Fuente de amenaza no identificada
+
+```gherkin
+Caso de prueba: Fuente no identificada
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte sin especificar la fuente del incidente
+Entonces el sistema rechaza la solicitud con un mensaje de error por campo obligatorio faltante
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 9: Reporte automático exitoso desde servicio productor
+
+```gherkin
+Caso de prueba: Reporte automático exitoso
+Dado que un servicio productor autenticado publica un evento en RabbitMQ con todos los campos requeridos y válidos
+Cuando el evento es recibido por el sistema
+Entonces el evento se valida, publica en RabbitMQ, se persiste en PostgreSQL y se notifica a los clientes vía WebSocket
+Y la acción queda registrada en el sistema de auditoría y logging estructurado
+```
+
+#### Caso de prueba 10: Reporte automático con dato inválido
+
+```gherkin
+Caso de prueba: Reporte automático con error de validación
+Dado que un servicio productor autenticado publica un evento en RabbitMQ con un campo inválido (por ejemplo, severidad "urgente")
+Cuando el sistema procesa el evento
+Entonces rechaza el evento, lo registra en los logs de auditoría y retorna un mensaje descriptivo de error
+```
+
+#### Caso de prueba 11: Publicación fallida a RabbitMQ con reintentos y envío a DLX
+
+```gherkin
+Caso de prueba: Publicación a RabbitMQ falla y reintenta
+Dado que un usuario autenticado reporta una amenaza válida
+Y RabbitMQ no está disponible para publicar el evento
+Cuando el sistema intenta publicar el evento hasta 3 veces sin éxito
+Entonces el evento es enviado automáticamente a la Dead Letter Exchange (DLX)
+Y se registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 12: Persistencia fallida en PostgreSQL
+
+```gherkin
+Caso de prueba: Persistencia fallida en base de datos
+Dado que un usuario autenticado reporta una amenaza válida
+Y ocurre un error al persistir los datos en PostgreSQL
+Cuando el sistema intenta guardar la amenaza
+Entonces retorna un mensaje descriptivo de error al usuario y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 13: Replay del historial exitoso por usuario
+
+```gherkin
+Caso de prueba: Replay de historial exitoso
+Dado que un usuario autenticado está conectado vía WebSocket
+Y existen amenazas históricas almacenadas en Redis
+Cuando solicita el replay del historial filtrando por usuario, rango de fechas y tipo de amenaza
+Entonces el sistema retorna únicamente los eventos que cumplen los filtros
+```
+
+#### Caso de prueba 14: Replay con filtros sin coincidencias
+
+```gherkin
+Caso de prueba: Replay sin resultados
+Dado que un usuario autenticado está conectado vía WebSocket
+Cuando solicita el replay del historial con filtros que no corresponden a ningún evento registrado
+Entonces el sistema retorna una respuesta vacía o mensaje indicando ausencia de resultados
+```
+
+#### Caso de prueba 15: Logging y auditoría de acciones exitosas
+
+```gherkin
+Caso de prueba: Registro de acciones exitosas
+Dado que un usuario autenticado reporta una amenaza válida
+Cuando la operación se completa exitosamente
+Entonces la acción debe quedar registrada en el sistema de auditoría y logging estructurado con todos los detalles relevantes
+```
+
+#### Caso de prueba 16: Logging y auditoría de acciones fallidas
+
+```gherkin
+Caso de prueba: Registro de errores en auditoría
+Dado que ocurre un error durante la validación, publicación o persistencia de un reporte de amenaza
+Cuando ocurre el incidente
+Entonces el sistema debe registrar el fallo con suficiente detalle en el sistema de auditoría y logging estructurado
+```
+
+#### Caso de prueba 17: Ingreso de datos excediendo los límites permitidos (longitud máxima)
+
+```gherkin
+Caso de prueba: Campos exceden longitud máxima
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte donde la descripción o el campo fuente excede la longitud máxima permitida por el sistema
+Entonces el sistema rechaza la solicitud con un mensaje de error de validación
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 18: Combinación de campos válidos y no válidos
+
+```gherkin
+Caso de prueba: Envío de reporte con combinación de campos válidos y no válidos
+Dado que un usuario autenticado accede al endpoint POST /api/threats
+Cuando envía un reporte con tipo válido, severidad válida, pero fecha inválida y descripción demasiado corta
+Entonces el sistema rechaza la solicitud y retorna mensajes descriptivos por cada campo inválido
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 19: Bloqueo temporal por exceder límite de uso
+
+```gherkin
+Caso de prueba: Bloqueo por exceso de reportes
+Dado que un usuario autenticado realiza múltiples intentos de reporte en un corto período de tiempo, excediendo el límite permitido
+Cuando intenta realizar un nuevo reporte
+Entonces el sistema bloquea temporalmente al usuario y retorna un mensaje informativo
+Y registra el incidente en los logs de auditoría
+```
+
+#### Caso de prueba 20: Reconexión y replay tras desconexión de WebSocket
+
+```gherkin
+Caso de prueba: Reconexión y replay tras desconexión
+Dado que un usuario autenticado estaba conectado vía WebSocket y se desconectó
+Cuando se reconecta al sistema y solicita el replay del historial
+Entonces el sistema permite la reconexión y entrega el historial solicitado desde Redis
+```
+
+---
+
+Estos casos de prueba cubren flujos normales, alternos, excepciones, validaciones, combinaciones, límites y reglas de negocio, siguiendo el enfoque sistemático recomendado por ISTQB.
+
 
 ---
 
