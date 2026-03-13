@@ -193,39 +193,105 @@ Para: Centralizar la respuesta a amenazas en RabbitMQ y permitir el procesamient
 
 ### Versión Refinada (Generada por SKAI)
 
-**[PENDIENTE: Pegar aquí la salida de SKAI después de ejecutar la instrucción "Diagnosticar historias de usuario"]**
+**Título: Gestión Centralizada de Reporte de Amenazas**
 
 ```
-[Aquí irá la historia refinada que SKAI genere]
+Descripción: Como analista de seguridad o servicio productor, quiero reportar incidentes de seguridad de forma manual (mediante la API) o automática (mediante servicios productores), para centralizar la respuesta a amenazas en RabbitMQ, permitir el procesamiento asíncrono, garantizar la persistencia y notificación en tiempo real, y facilitar la trazabilidad y replay de eventos.
 ```
+**Criterios de Aceptación:**
+1. Reporte Manual:
+
+    - El sistema debe aceptar reportes manuales de amenazas mediante un endpoint autenticado POST /api/threats, con campos requeridos: tipo, severidad, descripción, fecha y fuente del incidente.
+    - Solo usuarios autenticados con rol de "usuario/colaborador" pueden acceder al endpoint.
+
+2. Reporte Automático:
+
+    - El sistema debe aceptar reportes automáticos desde servicios productores autenticados, a través de RabbitMQ, con los mismos campos requeridos.
+
+3. Validación de Datos:
+
+    - Todos los reportes, manuales o automáticos, deben validarse con Joi siguiendo los siguientes criterios:
+        - Tipo de amenaza debe pertenecer al catálogo predefinido.
+        - Severidad debe ser uno de los valores permitidos (bajo, medio, alto, crítico).
+        - Descripción obligatoria, con mínimo 20 caracteres.
+        - Fecha debe ser válida y no futura.
+        - Fuente debe identificarse correctamente.
+
+4. Publicación de Eventos:
+
+    - Los eventos de amenazas deben publicarse en RabbitMQ usando ConfirmChannel.
+    - Si la publicación falla tras 3 intentos, el evento debe enviarse automáticamente a la Dead Letter Exchange (DLX).
+
+5. Persistencia:
+
+    - Los datos completos de la amenaza deben persistirse en PostgreSQL, garantizando las restricciones ACID y anonimización de datos personales conforme a GDPR.
+
+6. Notificación y Replay:
+
+    - Un worker debe consumir los eventos, notificar a los clientes conectados vía WebSocket y almacenar el historial de eventos en Redis.
+    - Los usuarios deben poder solicitar el replay del historial de amenazas desde Redis, filtrando por usuario, rango de fechas o tipo de amenaza.
+
+7. Auditoría y Logging:
+
+    - Todas las acciones de reporte, validación, publicación y persistencia deben registrarse en el sistema de auditoría y logging estructurado.
+
+8. Escenarios de Error:
+
+    - En caso de error de validación o persistencia, el sistema debe retornar un mensaje descriptivo y registrar el incidente en los logs de auditoría.
+
+### Notas Técnicas
+
+- La API debe estar protegida mediante autenticación JWT.
+- La gestión de roles y permisos debe seguir las políticas definidas en el contexto de negocio.
+- El sistema debe cumplir las regulaciones de protección de datos aplicables.
+
+### Notas adicionales:
+
+- Esta versión refinada cumple INVEST, aborda ambigüedades, incluye criterios de aceptación detallados y está alineada con los objetivos de CyberGuard System.
+
+- Preguntas abiertas para refinamiento adicional:
+    - ¿Hay límites de frecuencia para reportes manuales por usuario?
+    - ¿Cómo se notifica al usuario del éxito o fallo del reporte?
+    - ¿Qué campos deben ser obligatorios para reportes automáticos?
+    - ¿Qué parámetros debe permitir el replay del historial?
 
 ---
+
 
 ### Cuadro de diferencias detectadas
 
 | Aspecto | Versión Original | Versión Refinada | Principio INVEST Aplicado |
 |---------|------------------|------------------|---------------------------|
-| **Independencia (I)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
-| **Negociable (N)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
-| **Valiosa (V)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
-| **Estimable (E)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
-| **Pequeña (S)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
-| **Testeable (T)** | [Análisis pendiente] | [Análisis pendiente] | [Justificación] |
+| **Independencia (I)** | Depende de endpoints, workers y colas | Depende parcialmente; recomendable dividir en sub-historias | Dividir en "Reporte Manual", "Ingesta Automática", "Worker" facilita independencia |
+| **Negociable (N)** | Requisitos técnicos propuestos (ConfirmChannel, DLX) | Negociable: detalles técnicos pueden moverse a tareas técnicas | Mantener criterios de negocio claros; negociar implementación técnica |
+| **Valiosa (V)** | Centralización y procesamiento asíncrono | Alta: aporta trazabilidad y resiliencia operativa | Genera valor directo para operaciones de seguridad |
+| **Estimable (E)** | Falta detalle en flujos y datos | Estimable con contratos y esquemas definidos | Añadir especificaciones de payload y respuestas para estimaciones precisas |
+| **Pequeña (S)** | Muy amplia | No — su alcance es grande; dividir para entregas incrementales | Fragmentar en historias más pequeñas mejora entrega |
+| **Testeable (T)** | Criterios generales de validación | Testeable si se definen casos concretos (payloads, reintentos, DLX, replay) | Añadir casos de prueba concretos para cada escenario |
 
 **Principales Mejoras Identificadas:**
-1. [Pendiente: Completar después de recibir salida de SKAI]
-2. [Pendiente]
-3. [Pendiente]
+1. Definir contrato de API y campos mínimos para reportes manuales y automáticos.
+2. Especificar el comportamiento de publicación en RabbitMQ (reintentos, DLX, ConfirmChannel) y política de reintentos.
+3. Aclarar qué datos van a PostgreSQL (registro canónico) y qué a Redis (replay/cache), y aplicar reglas GDPR/anonimización si procede.
+
 
 ---
 
 ## Conclusiones Generales
 
 ### Lecciones Aprendidas
-- [Pendiente: Completar después del análisis completo]
+- La aplicación sistemática de los principios INVEST permite detectar ambigüedades, dependencias ocultas y criterios de aceptación incompletos que, de otro modo, se descubrirían durante la implementación.
+- Las historias de usuario que mezclan múltiples responsabilidades (ingesta, persistencia, notificación, replay) resultan difíciles de estimar y probar; fragmentarlas mejora la entrega incremental.
+- Incluir requisitos de seguridad (autenticación, autorización, GDPR) desde la fase de refinamiento evita retrabajos y vulnerabilidades en etapas posteriores.
 
 ### Impacto del Refinamiento
-- [Pendiente: Completar después del análisis completo]
+- **HU-001:** Se mejoraron los criterios de validación de credenciales, manejo de bloqueo por intentos fallidos y cumplimiento GDPR, facilitando una estimación más precisa y pruebas exhaustivas.
+- **HU-002:** Se detallaron los escenarios de validación de tokens, roles por endpoint y manejo de usuarios bloqueados, lo que permite definir pruebas unitarias y de integración concretas.
+- **HU-003:** Se clarificaron actores (analista vs. servicio productor), se definieron campos obligatorios, reglas de validación con Joi, política de reintentos (3 intentos → DLX), criterios de persistencia (PostgreSQL + Redis) y filtros de replay, transformando una historia ambigua en criterios accionables.
 
 ### Recomendaciones para Futuras Historias
-- [Pendiente: Completar después del análisis completo]
+- Aplicar siempre los principios INVEST como checklist de calidad antes de aceptar una historia en el sprint.
+- Separar criterios de negocio de detalles de implementación técnica; los últimos deben documentarse como tareas derivadas.
+- Incluir desde el inicio criterios de autenticación, autorización, privacidad y auditoría para mantener coherencia con el contexto de seguridad del proyecto.
+- Definir contratos de API (payloads, códigos de respuesta) y esquemas de datos como parte de los criterios de aceptación para facilitar la estimación y la automatización de pruebas.
+- Dividir historias que abarquen más de un flujo funcional en sub-historias independientes y testeables.
