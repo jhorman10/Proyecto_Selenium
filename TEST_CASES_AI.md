@@ -109,6 +109,212 @@ Esquema del Caso de Prueba: Bloqueo temporal tras múltiples intentos fallidos
 
 ### Casos de Prueba Generados por SKAI
 
+**Caso de prueba 1: Acceso autorizado con token válido y rol correcto**
+
+```gherkin
+Caso de prueba: Acceso exitoso a ruta protegida por un administrador autenticado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "administrador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es permitido
+  Y los datos del usuario (ID, correo electrónico, rol, estado de cuenta) se adjuntan al request
+  Y se registra el acceso exitoso en el sistema de auditoría
+```
+
+**Caso de prueba 2: Acceso autorizado a endpoint de colaborador**
+
+```gherkin
+Caso de prueba: Acceso exitoso a ruta protegida por un colaborador autenticado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "colaborador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de reporte de amenazas
+  Entonces el acceso es permitido
+  Y los datos del usuario se adjuntan al request
+  Y se registra el acceso exitoso en el sistema de auditoría
+```
+
+**Caso de prueba 3: Acceso denegado a endpoint de administración por colaborador**
+
+```gherkin
+Caso de prueba: Intento de acceso a endpoint de administración por usuario colaborador
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "colaborador" y el usuario está activo
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo de falta de permisos
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 4: Token JWT expirado**
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT expirado
+
+  Dado que tengo un token JWT expirado en el header Authorization en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo indicando token expirado
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 5: Token JWT inválido (firma incorrecta)**
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT con firma inválida
+
+  Dado que tengo un token JWT inválido en el header Authorization en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo indicando token inválido
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 6: Ausencia del header Authorization**
+
+```gherkin
+Caso de prueba: Intento de acceso sin header Authorization
+
+  Dado que no incluyo el header Authorization en la petición
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando que falta el token
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 7: Token JWT en formato incorrecto**
+
+```gherkin
+Caso de prueba: Intento de acceso con formato incorrecto del token JWT
+
+  Dado que incluyo un header Authorization pero no en formato "Bearer"
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje descriptivo de formato incorrecto
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 8: Usuario bloqueado intenta acceder**
+
+```gherkin
+Caso de prueba: Acceso denegado por usuario bloqueado
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el usuario correspondiente está bloqueado en el sistema
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando usuario bloqueado
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 9: Usuario excede límites de uso**
+
+```gherkin
+Caso de prueba: Acceso denegado por exceder límites de uso
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el usuario ha excedido los límites de uso permitidos
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando límite de uso excedido
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 10: Token de un producer accediendo a endpoint de administración**
+
+```gherkin
+Caso de prueba: Acceso denegado a endpoint de administración por usuario producer
+
+  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
+  Y el token contiene el rol "producer"
+  Cuando realizo una petición a un endpoint de administración protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje de falta de permisos
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 11: Acceso a endpoint público sin autenticación**
+
+```gherkin
+Caso de prueba: Acceso exitoso a endpoint público sin autenticación
+
+  Dado que no incluyo el header Authorization en la petición
+  Cuando realizo una petición a un endpoint público (por ejemplo, login o registro)
+  Entonces el acceso es permitido
+  Y no se requiere validación del token
+  Y se registra el acceso en el sistema de auditoría como público
+```
+
+**Caso de prueba 12: Longitud máxima del token en el header Authorization**
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT que excede la longitud máxima permitida
+
+  Dado que incluyo un token JWT en el header Authorization que excede la longitud máxima configurada
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando token inválido por longitud
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 13: Token JWT con datos de usuario incompletos**
+
+```gherkin
+Caso de prueba: Intento de acceso con token JWT sin datos completos de usuario
+
+  Dado que tengo un token JWT válido pero faltan datos requeridos (ejemplo: rol o ID)
+  Cuando realizo una petición a cualquier endpoint protegido
+  Entonces el acceso es denegado con código 401 Unauthorized
+  Y se retorna un mensaje indicando datos insuficientes en el token
+  Y se registra el intento fallido en el sistema de auditoría
+```
+
+**Caso de prueba 14: Validación de combinación de roles y endpoints**
+
+```gherkin
+Caso de prueba: Acceso según matriz de permisos configurada
+
+  Dado que tengo un token JWT válido con un rol específico
+  Cuando realizo una petición a un endpoint cuya autorización depende de la matriz de permisos
+  Entonces el acceso es permitido o denegado según la configuración actual de la matriz
+  Y el resultado es registrado en el sistema de auditoría
+```
+
+**Caso de prueba 15: Acceso concurrente con múltiples tokens para el mismo usuario**
+
+```gherkin
+Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mismo usuario
+
+  Dado que tengo dos tokens JWT válidos para el mismo usuario en diferentes sesiones
+  Cuando realizo peticiones simultáneas a endpoints protegidos
+  Entonces ambos accesos se permiten si los tokens no están revocados ni expirados
+  Y se registran ambos accesos en el sistema de auditoría con los datos de usuario correspondientes
+```
+
+### Ajustes Realizados por el Probador
+
+| ID Caso | Caso de Prueba (Descripción) | Ajuste del Probador | ¿Por qué se ajustó? |
+|---------|------------------------------|---------------------|----------------------|
+| **CP-002-01** | **Token malformado no rechazado:**<br>**Dado que** envío un token con estructura inválida (ej. sin punto separador).<br>**Cuando** el middleware intenta decodificar.<br>**Entonces** retorna 401 con mensaje genérico. | Se agregó validación de que el middleware rechace tokens con estructura malformada (no 3 segmentos base64) **antes** de intentar verificar la firma, retornando 401 con mensaje genérico que no revele detalles de implementación. | La instrucción SKAI no diferencia entre token con firma incorrecta y token con estructura inválida. Según BUSINESS_CONTEXT, la seguridad JWT requiere validar estructura antes de firma para evitar ataques de inyección y reducir carga de procesamiento criptográfico innecesario. |
+| **CP-002-02** | **Rol no contemplado en matriz:**<br>**Dado que** el token contiene un rol no definido en la matriz de permisos.<br>**Cuando** accede a cualquier ruta protegida.<br>**Entonces** se deniega acceso por defecto (deny-by-default). | Se agregó escenario donde un rol desconocido (ej. "auditor") intenta acceder. El sistema debe aplicar política deny-by-default: si el rol no está en la matriz, se deniega con 401. Verificar que no se aplique fail-open. | La instrucción no contempla roles fuera de la matriz configurada. Según BUSINESS_CONTEXT, los roles son administrador, colaborador y producer. Si un token válido contiene un rol inexistente, el middleware debe denegar por defecto (principio de menor privilegio). Evita escalamiento de privilegios. |
+| **CP-002-03** | **Token revocado en lista negra:**<br>**Dado que** un token JWT válido fue agregado a una lista de revocación.<br>**Cuando** se usa para acceder a ruta protegida.<br>**Entonces** se deniega el acceso. | Se agregó escenario de token revocado: aunque no haya expirado, si fue invalidado (ej. usuario cambió contraseña, admin lo revocó), el middleware debe verificar contra lista de revocación y denegar con 401. Registrar en auditoría. | La instrucción no contempla revocación de tokens antes de su expiración. Según BUSINESS_CONTEXT, HU-002 debe manejar usuarios bloqueados y revocación. Si un administrador desactiva un usuario, los tokens activos deben dejar de funcionar inmediatamente. Crítico para seguridad ante tokens comprometidos. |
+| **CP-002-04** | **Validación de claims obligatorios:**<br>**Dado que** el token es decodificable pero falta el claim "rol".<br>**Cuando** el middleware lo procesa.<br>**Entonces** deniega acceso con 401. | Se agregó validación exhaustiva de claims obligatorios: id, email, rol deben estar presentes. Si falta alguno, denegar con 401 y mensaje indicando "datos insuficientes en el token" sin detallar qué claim falta. Registrar en auditoría qué claim faltó (solo en logs internos). | La instrucción genera un caso genérico (caso 13) pero no distingue qué claims son obligatorios vs opcionales. Según BUSINESS_CONTEXT, el JWT debe incluir id, email y rol como mínimo para que el middleware pueda adjuntar datos al request y validar autorización. |
+| **CP-002-05** | **Inyección en header Authorization:**<br>**Dado que** el header contiene caracteres especiales o scripts.<br>**Cuando** el middleware lo procesa.<br>**Entonces** rechaza sin procesarlo. | Se agregó escenario de inyección: header Authorization con contenido malicioso (ej. Bearer <script>alert(1)</script> o cadenas SQL). El middleware debe sanitizar/rechazar antes de cualquier procesamiento del token. Retornar 401 genérico. | La instrucción no contempla ataques de inyección a través del header. Es una prueba de seguridad fundamental (OWASP Top 10). El middleware es la primera línea de defensa y debe sanitizar todo input antes de procesarlo. |
+
+**Técnicas de Diseño Aplicadas:**
+- **Partición de equivalencia:** Se dividieron los tokens en clases: válido/expirado/firma inválida/malformado/revocado/incompleto. Los roles en: administrador (acceso total), colaborador (acceso parcial), producer (sin acceso admin), rol desconocido (deny-by-default). Los endpoints en: protegidos y públicos.
+- **Valores límite:** Se probó el límite de longitud máxima del token en el header Authorization. Se validaron tokens con exactamente los claims mínimos requeridos vs. tokens con un claim faltante (frontera entre válido e inválido).
+- **Pruebas de seguridad:** Se incluyeron escenarios de inyección en header, tokens revocados, política deny-by-default para roles desconocidos, y validación de que los mensajes de error no revelen detalles internos de implementación (prevención de information disclosure).
+- **Pruebas negativas:** Se cubrieron todos los escenarios de rechazo: sin token, token expirado, firma inválida, formato incorrecto, usuario bloqueado, límites excedidos, rol sin permisos, datos incompletos y acceso concurrente.
+
+---
+
+## HU-003: Gestión de Amenazas Unificada
+
+### Casos de Prueba Generados por SKAI
+
 **Caso de prueba 1: Reporte manual exitoso por usuario autenticado**
 
 ```gherkin
@@ -310,219 +516,17 @@ Entonces el sistema permite la reconexión y entrega el historial solicitado des
 
 | ID Caso | Caso de Prueba (Descripción) | Ajuste del Probador | ¿Por qué se ajustó? |
 |---------|------------------------------|---------------------|----------------------|
-| CP-002-01 | [Pendiente] | [Pendiente] | [Pendiente] |
-| CP-002-02 | [Pendiente] | [Pendiente] | [Pendiente] |
-| CP-002-03 | [Pendiente] | [Pendiente] | [Pendiente] |
+| **CP-003-01** | **Fallo de RabbitMQ sin validar DLX:**<br>**Dado que** un reporte válido se publica.<br>**Cuando** RabbitMQ falla tras 3 reintentos.<br>**Entonces** se envía a DLX. | Se agregó verificación de que el evento efectivamente llegue a la DLX y sea recuperable. Validar que el ConfirmChannel retorne nack y que el sistema no pierda el evento. Verificar que el usuario reciba mensaje de "reporte encolado para procesamiento posterior". | La instrucción genera el escenario de fallo (caso 11) pero no valida que el evento sea recuperable desde la DLX. Según BUSINESS_CONTEXT, los eventos deben confirmarse en RabbitMQ (ConfirmChannel) y reenviarse a DLX en caso de fallo. Es crítico garantizar zero-event-loss para la resiliencia del sistema. |
+| **CP-003-02** | **Persistencia sin validar ACID:**<br>**Dado que** un reporte se persiste en PostgreSQL.<br>**Cuando** la transacción se completa.<br>**Entonces** se verifica consistencia. | Se agregó validación de que la persistencia en PostgreSQL cumpla ACID: verificar que si falla el commit, se haga rollback completo (no queden registros parciales). Validar que los campos almacenados coincidan con los enviados. Verificar anonimización de datos personales según GDPR. | La instrucción no valida la integridad transaccional ni el cumplimiento GDPR en la persistencia. Según BUSINESS_CONTEXT, las amenazas deben cumplir restricciones ACID en PostgreSQL y los datos personales deben anonimizarse conforme a GDPR. Sin esta validación, podrían existir registros corruptos o violaciones de privacidad. |
+| **CP-003-03** | **Replay sin validar límites de Redis:**<br>**Dado que** se solicita replay de historial.<br>**Cuando** hay miles de eventos.<br>**Entonces** se aplica paginación. | Se agregó validación de que el replay desde Redis aplique paginación o límite máximo de eventos por solicitud. Verificar que los filtros (usuario, fecha, tipo) se apliquen correctamente en Redis y no en memoria. Validar rendimiento con volumen alto de datos. | La instrucción genera escenarios de replay (casos 13-14) pero no contempla volúmenes altos. Según BUSINESS_CONTEXT, el historial se almacena en Redis para replay. En producción, sin paginación, una solicitud de replay podría causar timeout o consumo excesivo de memoria en el servidor. |
+| **CP-003-04** | **WebSocket sin validar autenticación:**<br>**Dado que** un cliente se conecta vía WebSocket.<br>**Cuando** no envía token de autenticación.<br>**Entonces** se rechaza la conexión. | Se agregó validación de que las conexiones WebSocket requieran autenticación JWT válida. Si el token expira durante una sesión activa, el servidor debe cerrar la conexión y forzar re-autenticación. El cliente no autenticado no debe recibir notificaciones. | La instrucción asume que el usuario "está conectado vía WebSocket" sin validar que la conexión esté autenticada. Según BUSINESS_CONTEXT, el acceso debe estar protegido por JWT. Las conexiones WebSocket sin autenticación representan un vector de ataque que permitiría a atacantes recibir notificaciones de amenazas en tiempo real. |
+| **CP-003-05** | **Reporte manual sin validar respuesta al usuario:**<br>**Dado que** un reporte manual es aceptado.<br>**Cuando** se completa el flujo completo.<br>**Entonces** el usuario recibe confirmación. | Se agregó validación de que tras un reporte exitoso, el usuario reciba una respuesta HTTP 201 Created con el ID de la amenaza creada y un timestamp. El sistema debe confirmar que el evento fue publicado en RabbitMQ antes de responder al usuario. No responder 200 si la publicación aún está pendiente. | La instrucción genera el happy path (caso 1) pero no especifica qué recibe el usuario como confirmación. Según BUSINESS_CONTEXT, se usa ConfirmChannel en RabbitMQ, lo que implica que el sistema espera confirmación antes de responder. Es crítico que el usuario sepa que su reporte fue procesado correctamente y tenga un ID para seguimiento. |
 
 **Técnicas de Diseño Aplicadas:**
-- **Partición de equivalencia:** [Explicar aplicación]
-- **Valores límite:** [Explicar aplicación]
-- **Pruebas de seguridad:** [Explicar aplicación]
-- **Pruebas negativas:** [Explicar aplicación]
-
----
-
-## HU-003: Gestión de Amenazas Unificada
-
-### Casos de Prueba Generados por SKAI
-
-**Caso de prueba 1: Acceso autorizado con token válido y rol correcto**
-
-```gherkin
-Caso de prueba: Acceso exitoso a ruta protegida por un administrador autenticado
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el token contiene el rol "administrador" y el usuario está activo
-  Cuando realizo una petición a un endpoint de administración protegido
-  Entonces el acceso es permitido
-  Y los datos del usuario (ID, correo electrónico, rol, estado de cuenta) se adjuntan al request
-  Y se registra el acceso exitoso en el sistema de auditoría
-```
-
-**Caso de prueba 2: Acceso autorizado a endpoint de colaborador**
-
-```gherkin
-Caso de prueba: Acceso exitoso a ruta protegida por un colaborador autenticado
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el token contiene el rol "colaborador" y el usuario está activo
-  Cuando realizo una petición a un endpoint de reporte de amenazas
-  Entonces el acceso es permitido
-  Y los datos del usuario se adjuntan al request
-  Y se registra el acceso exitoso en el sistema de auditoría
-```
-
-**Caso de prueba 3: Acceso denegado a endpoint de administración por colaborador**
-
-```gherkin
-Caso de prueba: Intento de acceso a endpoint de administración por usuario colaborador
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el token contiene el rol "colaborador" y el usuario está activo
-  Cuando realizo una petición a un endpoint de administración protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje descriptivo de falta de permisos
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 4: Token JWT expirado**
-
-```gherkin
-Caso de prueba: Intento de acceso con token JWT expirado
-
-  Dado que tengo un token JWT expirado en el header Authorization en formato "Bearer"
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje descriptivo indicando token expirado
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 5: Token JWT inválido (firma incorrecta)**
-
-```gherkin
-Caso de prueba: Intento de acceso con token JWT con firma inválida
-
-  Dado que tengo un token JWT inválido en el header Authorization en formato "Bearer"
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje descriptivo indicando token inválido
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 6: Ausencia del header Authorization**
-
-```gherkin
-Caso de prueba: Intento de acceso sin header Authorization
-
-  Dado que no incluyo el header Authorization en la petición
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje indicando que falta el token
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 7: Token JWT en formato incorrecto**
-
-```gherkin
-Caso de prueba: Intento de acceso con formato incorrecto del token JWT
-
-  Dado que incluyo un header Authorization pero no en formato "Bearer"
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje descriptivo de formato incorrecto
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 8: Usuario bloqueado intenta acceder**
-
-```gherkin
-Caso de prueba: Acceso denegado por usuario bloqueado
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el usuario correspondiente está bloqueado en el sistema
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje indicando usuario bloqueado
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 9: Usuario excede límites de uso**
-
-```gherkin
-Caso de prueba: Acceso denegado por exceder límites de uso
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el usuario ha excedido los límites de uso permitidos
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje indicando límite de uso excedido
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 10: Token de un producer accediendo a endpoint de administración**
-
-```gherkin
-Caso de prueba: Acceso denegado a endpoint de administración por usuario producer
-
-  Dado que tengo un token JWT válido en el header Authorization en formato "Bearer"
-  Y el token contiene el rol "producer"
-  Cuando realizo una petición a un endpoint de administración protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje de falta de permisos
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 11: Acceso a endpoint público sin autenticación**
-
-```gherkin
-Caso de prueba: Acceso exitoso a endpoint público sin autenticación
-
-  Dado que no incluyo el header Authorization en la petición
-  Cuando realizo una petición a un endpoint público (por ejemplo, login o registro)
-  Entonces el acceso es permitido
-  Y no se requiere validación del token
-  Y se registra el acceso en el sistema de auditoría como público
-```
-
-**Caso de prueba 12: Longitud máxima del token en el header Authorization**
-
-```gherkin
-Caso de prueba: Intento de acceso con token JWT que excede la longitud máxima permitida
-
-  Dado que incluyo un token JWT en el header Authorization que excede la longitud máxima configurada
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje indicando token inválido por longitud
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 13: Token JWT con datos de usuario incompletos**
-
-```gherkin
-Caso de prueba: Intento de acceso con token JWT sin datos completos de usuario
-
-  Dado que tengo un token JWT válido pero faltan datos requeridos (ejemplo: rol o ID)
-  Cuando realizo una petición a cualquier endpoint protegido
-  Entonces el acceso es denegado con código 401 Unauthorized
-  Y se retorna un mensaje indicando datos insuficientes en el token
-  Y se registra el intento fallido en el sistema de auditoría
-```
-
-**Caso de prueba 14: Validación de combinación de roles y endpoints**
-
-```gherkin
-Caso de prueba: Acceso según matriz de permisos configurada
-
-  Dado que tengo un token JWT válido con un rol específico
-  Cuando realizo una petición a un endpoint cuya autorización depende de la matriz de permisos
-  Entonces el acceso es permitido o denegado según la configuración actual de la matriz
-  Y el resultado es registrado en el sistema de auditoría
-```
-
-**Caso de prueba 15: Acceso concurrente con múltiples tokens para el mismo usuario**
-
-```gherkin
-Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mismo usuario
-
-  Dado que tengo dos tokens JWT válidos para el mismo usuario en diferentes sesiones
-  Cuando realizo peticiones simultáneas a endpoints protegidos
-  Entonces ambos accesos se permiten si los tokens no están revocados ni expirados
-  Y se registran ambos accesos en el sistema de auditoría con los datos de usuario correspondientes
-```
-
-### Ajustes Realizados por el Probador
-
-| ID Caso | Caso de Prueba (Descripción) | Ajuste del Probador | ¿Por qué se ajustó? |
-|---------|------------------------------|---------------------|----------------------|
-| CP-003-01 | [Ejemplo: Falta validar comportamiento cuando RabbitMQ no está disponible] | [Agregar escenario de fallo de conexión a RabbitMQ] | [Según arquitectura, debe enviarse a DLX. Crítico para resiliencia del sistema] |
-| CP-003-02 | [Ejemplo: No valida persistencia en PostgreSQL tras publicación exitosa] | [Agregar verificación de persistencia en BD] | [Regla de negocio: amenazas deben cumplir ACID en PostgreSQL] |
-| CP-003-03 | [Pendiente] | [Pendiente] | [Pendiente] |
-
-**Técnicas de Diseño Aplicadas:**
-- **Partición de equivalencia:** [Explicar aplicación]
-- **Pruebas de integración:** [Explicar aplicación]
-- **Pruebas de resiliencia:** [Explicar aplicación]
-- **Pruebas de flujo de eventos:** [Explicar aplicación]
+- **Partición de equivalencia:** Se dividieron los reportes en clases: manuales (vía API) vs automáticos (vía RabbitMQ). Los campos se particionaron en válidos/inválidos para tipo (catálogo/fuera de catálogo), severidad (bajo|medio|alto|crítico vs otros), descripción (≥20 chars vs <20), fecha (pasada/hoy vs futura) y fuente (presente vs ausente).
+- **Pruebas de integración:** Se validó el flujo completo end-to-end: API → validación Joi → RabbitMQ (ConfirmChannel) → PostgreSQL (ACID) → WebSocket → Redis (replay). Cada punto de integración tiene escenarios de éxito y fallo para garantizar que la cadena no se rompa silenciosamente.
+- **Pruebas de resiliencia:** Se cubrieron escenarios de fallo en cada componente externo: RabbitMQ no disponible (reintentos + DLX), PostgreSQL caído (rollback + mensaje de error), Redis sin datos (respuesta vacía), WebSocket desconectado (reconexión + replay). Se validó que el sistema degrade gracefully sin perder eventos.
+- **Pruebas de flujo de eventos:** Se verificó el ciclo de vida completo del evento: publicación → confirmación (ConfirmChannel) → consumo por worker → persistencia → notificación → almacenamiento en Redis → replay. Se incluyeron escenarios de filtrado por usuario, rango de fechas y tipo de amenaza para validar que el replay sea preciso.
 
 ---
 
@@ -532,35 +536,35 @@ Caso de prueba: Acceso concurrente con diferentes tokens JWT válidos para el mi
 
 | Tipo de Prueba | HU-001 | HU-002 | HU-003 | Total |
 |----------------|--------|--------|--------|-------|
-| Funcionales | [Pendiente] | [Pendiente] | [Pendiente] | [Pendiente] |
-| Seguridad | [Pendiente] | [Pendiente] | [Pendiente] | [Pendiente] |
-| Integración | [Pendiente] | [Pendiente] | [Pendiente] | [Pendiente] |
-| Negativas | [Pendiente] | [Pendiente] | [Pendiente] | [Pendiente] |
-| **TOTAL** | **[X]** | **[X]** | **[X]** | **[X]** |
+| Funcionales | 4 | 3 | 9 | 16 |
+| Seguridad | 4 | 7 | 2 | 13 |
+| Integración | 1 | 2 | 6 | 9 |
+| Negativas | 1 | 3 | 3 | 7 |
+| **TOTAL** | **10** | **15** | **20** | **45** |
 
 ### Análisis de Riesgos Cubiertos
 
 | Riesgo Identificado | Historia Relacionada | Casos que lo Mitigan |
 |---------------------|---------------------|---------------------|
-| Acceso no autorizado | HU-001, HU-002 | [Pendiente] |
-| Pérdida de eventos | HU-003 | [Pendiente] |
-| Ataques de fuerza bruta | HU-001 | [Pendiente] |
-| Tokens comprometidos | HU-002 | [Pendiente] |
-| Fallo de servicios externos | HU-003 | [Pendiente] |
+| Acceso no autorizado | HU-001, HU-002 | CP-001-02, CP-001-03, CP-002: casos 3-10, 13 |
+| Pérdida de eventos | HU-003 | CP-003: casos 9, 11, 12; ajustes CP-003-01, CP-003-02 |
+| Ataques de fuerza bruta | HU-001 | CP-001-04, CP-001-05 (bloqueo temporal y desbloqueo) |
+| Tokens comprometidos | HU-002 | CP-002: casos 4, 5, 7, 8, 12, 13; ajustes CP-002-01, CP-002-03 |
+| Fallo de servicios externos | HU-003 | CP-003: casos 11, 12, 20; ajuste CP-003-03 |
 
 ---
 
 ## Conclusiones
 
 ### Calidad de la Generación por IA
-- **Fortalezas:** [Pendiente: Completar después de recibir salidas de SKAI]
-- **Debilidades:** [Pendiente]
-- **Áreas que requirieron más ajuste humano:** [Pendiente]
+- **Fortalezas:** SKAI generó una cobertura amplia de escenarios funcionales y de seguridad, incluyendo flujos alternativos y negativos. Los casos siguen una estructura Gherkin clara y cubren las reglas de negocio principales de cada HU. La generación fue especialmente fuerte en escenarios de validación de datos (Joi) y manejo de roles.
+- **Debilidades:** La IA no diferenció casos de prueba según la HU correcta (los escenarios de middleware se generaron con contexto de amenazas y viceversa). No contempló escenarios de seguridad avanzados como inyección en headers, revocación de tokens o política deny-by-default. Faltó validar la integridad transaccional (ACID) y el cumplimiento GDPR en persistencia.
+- **Áreas que requirieron más ajuste humano:** Validación de resiliencia end-to-end (DLX, rollback, reconexión WebSocket), escenarios de seguridad ofensiva (inyección, tokens revocados), rendimiento y paginación en replay de historial, y confirmación de respuesta al usuario tras reporte exitoso.
 
 ### Recomendaciones para Automatización
-1. [Pendiente: Identificar casos prioritarios para Selenium]
-2. [Pendiente]
-3. [Pendiente]
+1. **Prioridad alta:** Automatizar los escenarios de autenticación (HU-001) y middleware (HU-002) con Serenity BDD + REST Assured, ya que son prerequisitos de seguridad para todo el sistema.
+2. **Prioridad media:** Automatizar los flujos de reporte de amenazas (HU-003 casos 1-8) con validación de respuestas HTTP y verificación de persistencia en PostgreSQL.
+3. **Prioridad baja:** Automatizar escenarios de integración con RabbitMQ y WebSocket usando contenedores Docker para simular fallos de infraestructura (DLX, reconexión).
 
 ### Próximos Pasos
 - [ ] Implementar casos de prueba en Serenity BDD con patrón Screenplay
